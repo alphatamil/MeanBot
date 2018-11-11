@@ -1,0 +1,106 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  app_websocket: "true"
+  app_mongo_user: $v_app_mongo_user
+  app_mongo_host: $v_app_mongo_host
+  app_mongo_password: $v_app_mongo_password
+  app_log_path: /var/log/hp-supplies-bot/app.log
+  app_port: "3000" # this is the port exposed by the container
+  dotenv: .env.example
+  image_tag: $CI_BUILD_REF_NAME
+  image: $CI_REGISTRY_IMAGE
+  registry_pass: $CI_BUILD_TOKEN
+  registry_user: gitlab-ci-token
+  registry: $CI_REGISTRY
+  ecs_definition: ecs-task-definition.json
+  ecs_entrypoint: app:3000
+  app_image_tag: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+
+docker_build_develop:
+  tags:
+    - docker
+  stage: build
+  variables:
+    app_env: development
+    app_url: https://hp-supplies-bot.dev.kacdn.net
+  script:
+    - env
+    - docker login -u $registry_user -p $registry_pass $registry
+    - docker build -t $app_image_tag --build-arg NODE_ENV=$app_env --build-arg APP_URL=$app_url .
+    - docker push $app_image_tag
+  only:
+    - develop
+
+docker_build_master:
+  tags:
+    - docker
+  stage: build
+  variables:
+    app_env: staging
+    app_url: https://hp-supplies-bot-staging.eu-staging.kacdn.net
+  script:
+    - env
+    - docker login -u $registry_user -p $registry_pass $registry
+    - docker build -t $app_image_tag --build-arg NODE_ENV=$app_env --build-arg APP_URL=$app_url .
+    - docker push $app_image_tag
+  only:
+    - master
+
+docker_build_release:
+  tags:
+    - docker
+  stage: build
+  variables:
+    app_env: production
+    app_url: https://hp-supplies-bot-release.kacdn.net
+  script:
+    - docker login -u $registry_user -p $registry_pass $registry
+    - docker build -t $app_image_tag --build-arg NODE_ENV=$app_env --build-arg APP_URL=$app_url .
+    - docker push $app_image_tag
+  only:
+    - /^v.*$/
+
+deploy_dev:
+  image: registry.git.int.krds.com/tools/deploy:edge
+  tags:
+    - deploy
+    - sg
+  stage: deploy
+  variables:
+    app_env: development
+    app_url: https://hp-supplies-bot-dev.dev.kacdn.net
+  script:
+    - deploy-ecs sg-devbox
+  only:
+    - develop
+
+deploy_staging:
+  image: registry.git.int.krds.com/tools/deploy:edge
+  tags:
+    - deploy
+    - eu
+  stage: deploy
+  variables:
+    app_env: staging
+    app_url: https://hp-supplies-bot-staging.eu-staging.kacdn.net
+  script:
+    - deploy-ecs eu-staging
+  only:
+    - master
+
+deploy_release:
+  image: registry.git.int.krds.com/tools/deploy:edge
+  tags:
+    - deploy
+    - sg
+  stage: deploy
+  variables:
+    app_env: production
+    app_url: https://hp-supplies-bot-release.sg2.kacdn.net
+  script:
+    - deploy-ecs sg-prod-2
+  only:
+    - /^v.*$/

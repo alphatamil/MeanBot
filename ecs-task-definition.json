@@ -1,0 +1,34 @@
+{
+  "family": "HP-SUPPLIES-BOT-ECS",
+  "taskRoleArn": "arn:aws:iam::060686542424:role/EcsTaskS3ReadOnlyAccess",
+  "networkMode": "bridge",
+  "containerDefinitions": [
+    {
+      "name": "app",
+      "image": "{{app_image_tag}}",
+      "cpu": 1,
+      "memoryReservation": 128,
+      "essential": true,
+      "readonlyRootFilesystem": false,
+      "command": ["node", "./server.js"],
+      "environment": [
+        {
+          "name": "APP_WEBSOCKET",
+          "value": "{{app_websocket}}"
+        },
+        {
+          "name": "APP_ENV",
+          "value": "{{app_env}}"
+        },
+        {
+          "name": "NODE_ENV",
+          "value": "{{app_env}}"
+        },
+        {
+          "name": "LOG_PATH",
+          "value": "{{app_log_path}}"
+        }
+      ]
+    }
+  ]
+}
