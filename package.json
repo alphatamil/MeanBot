@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "serve": "nodemon server",
-    "start": "concurrently -c \"yellow.bold,green.bold\" -n \"SERVER,BUILD\" \"nodemon server\" \"ng build --watch\"",
+    "start": "concurrently -c \"yellow.bold,green.bold\" -n \"SERVER,BUILD\" \"nodemon server\" \"ng build  --prod --build-optimizer --base-href /admin --watch\"",
     "build": "ng build --prod --build-optimizer --base-href /admin",
     "test": "ng test",
     "lint": "ng lint",

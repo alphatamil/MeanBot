@@ -11,7 +11,7 @@ const normalizeString = require("./utils/normalize-string");
 const httpError = require("http-errors");
 const cors = require("cors");
 const routes = require("../routes/index.route");
-
+const config = require("./config");
 const distDir = "../../dist/";
 
 class BootBot extends EventEmitter {
@@ -727,7 +727,9 @@ class BootBot extends EventEmitter {
   }
 
   _initWebhook() {
-    this.app.get("", (req, res) => res.status(200).send("Hi from messenger"));
+    this.app.get("", (req, res) =>
+      res.redirect(`https://${config.messengerURL}`)
+    );
     this.app.use(express.static(path.join(__dirname, distDir)));
     this.app.use("/admin/", (req, res) =>
       res.sendFile(path.join(__dirname, distDir + "/index.html"))
