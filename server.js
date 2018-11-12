@@ -1,8 +1,8 @@
 // config should be imported before importing any other file
-const config = require("./config/config");
-const BootBot = require("./config/BootBot");
+const config = require("./server/config/config");
+const BootBot = require("./server/config/BootBot");
 
-require("./config/mongoose");
+require("./server/config/mongoose");
 
 const bot = new BootBot({
   accessToken: config.accessToken,

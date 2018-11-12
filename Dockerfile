@@ -14,15 +14,17 @@ ENV  UNITY_URL=https://unity.krds.com/
 ENV  UNITY_TOKEN=Uty99iAowuaWGu7hxsS1RjOx4nk6vkemZ4hKCG00
 
 #SET working dir and copy files to it
-WORKDIR /usr/src/hp-supplies-bot
-COPY . /usr/src/hp-supplies-bot/
+WORKDIR /usr/src/app
+COPY . /usr/src/app/
 
+# Create quotes directory
+RUN mkdir -p /usr/src/app/public/quotes
 
 # LOGS VOLUME 
 VOLUME ["/var/log/hp-supplies-bot/", "/usr/src/hp-supplies-bot/public"]
 
 #copy node_modules folder from tmp 
-RUN cp -a /tmp/node_modules /usr/src/hp-supplies-bot/
+RUN cp -a /tmp/node_modules /usr/src/app/
 
 #Run angular build
 RUN yarn build
